@@ -4,7 +4,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.kafka.example.producer.properties.KafkaProducerProperties;
+import ru.kafka.example.producer.config.properties.KafkaProducerProperties;
 
 @Configuration
 @EnableConfigurationProperties(KafkaProducerProperties.class)

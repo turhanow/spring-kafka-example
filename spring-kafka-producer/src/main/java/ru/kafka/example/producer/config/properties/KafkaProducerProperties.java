@@ -1,4 +1,4 @@
-package ru.kafka.example.producer.properties;
+package ru.kafka.example.producer.config.properties;
 
 import lombok.Getter;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;

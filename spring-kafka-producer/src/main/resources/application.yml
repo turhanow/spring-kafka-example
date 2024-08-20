@@ -8,8 +8,8 @@ spring:
     producer:
       bootstrap_servers: localhost:9092
       value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    template:
+      default-topic: test-output
 
-
-kafka:
-  output:
-    topic: test-producer
+scheduler:
+  data-producer: PT10S
