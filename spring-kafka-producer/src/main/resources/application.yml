@@ -4,3 +4,12 @@ server:
 spring:
   application:
     name: spring-kafka-producer
+  kafka:
+    producer:
+      bootstrap_servers: localhost:9092
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+
+
+kafka:
+  output:
+    topic: test-producer
