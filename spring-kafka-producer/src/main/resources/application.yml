@@ -9,7 +9,7 @@ spring:
       bootstrap_servers: localhost:9092
       value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
     template:
-      default-topic: test-output
+      default-topic: test-user
 
 scheduler:
   data-producer: PT10S

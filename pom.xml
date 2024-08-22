@@ -17,6 +17,7 @@
     <description>Kafka example project</description>
 
     <modules>
+        <module>spring-kafka-consumer</module>
         <module>spring-kafka-producer</module>
     </modules>
 

@@ -8,9 +8,9 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>spring-kafka-producer</artifactId>
+    <artifactId>spring-kafka-consumer</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <description>Spring kafka producer example project</description>
+    <description>Spring kafka consumer example project</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -43,8 +43,7 @@
                         </goals>
                         <configuration>
                             <sourceDirectory>${project.parent.basedir}/avro</sourceDirectory>
-                            <outputDirectory>${project.basedir}/src/main/java/ru/kafka/example/producer
-                            </outputDirectory>
+                            <outputDirectory>${project.basedir}/src/main/java/ru/kafka/example/consumer</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
