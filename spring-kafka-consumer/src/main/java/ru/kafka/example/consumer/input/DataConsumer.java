@@ -35,6 +35,7 @@ public class DataConsumer implements Runnable {
         while (!shutdown.get()) {
             var records = kafkaConsumer.poll(Duration.ofMillis(Long.MAX_VALUE));
             records.forEach(this::doProcess);
+            // Асинхронный коммит смещений, фиксируем после успешной обработки данных
             kafkaConsumer.commitAsync((offsets, exception) -> {
                 if (Objects.nonNull(exception)) {
                     log.error("Commit failed for offsets: {} due to {}", offsets, exception.getLocalizedMessage());
@@ -47,10 +48,12 @@ public class DataConsumer implements Runnable {
         boolean isSuccess = Boolean.FALSE;
         while (!isSuccess && !shutdown.get()) {
             try {
+                // Декодируем запись из Avro формата
                 var reader = new SpecificDatumReader<>(avro.User.class);
                 var decoder = DecoderFactory.get().binaryDecoder(record.value(), null);
                 var user = reader.read(null, decoder);
                 System.out.printf("Received user: %s%n", user);
+                // Устанавливаем флаг успеха, если сообщение успешно обработано и данные выведены в консоль
                 isSuccess = Boolean.TRUE;
             } catch (Exception ex) {
                 log.error("Unexpected error:", ex);
@@ -60,17 +63,20 @@ public class DataConsumer implements Runnable {
 
     @PostConstruct
     private void init() {
+        // Подписываемся на Kafka топик и запускаем обработку сообщений в отдельном потоке
         kafkaConsumer.subscribe(List.of(topic));
         executorService.submit(this);
     }
 
     @PreDestroy
     public void onShutdown() {
+        // Устанавливаем флаг остановки, чтобы выйти из цикла обработки сообщений и закрываем kafkaConsumer
         shutdown.set(true);
         kafkaConsumer.close();
+        // Пытаемся корректно завершить работу ExecutorService
         try {
             executorService.shutdown();
-            if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+            if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
                 log.error("Executor did not terminate in the specified time.");
                 executorService.shutdownNow();
             }

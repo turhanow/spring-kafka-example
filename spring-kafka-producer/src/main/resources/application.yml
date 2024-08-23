@@ -12,4 +12,4 @@ spring:
       default-topic: test-user
 
 scheduler:
-  data-producer: PT10S
+  data-producer: PT1S
