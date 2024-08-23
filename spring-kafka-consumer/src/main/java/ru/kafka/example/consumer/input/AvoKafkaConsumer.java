@@ -15,13 +15,14 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DataConsumer implements Runnable {
+public class AvoKafkaConsumer implements Runnable {
 
     private final KafkaConsumer<String, byte[]> kafkaConsumer;
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
@@ -33,9 +34,9 @@ public class DataConsumer implements Runnable {
     @Override
     public void run() {
         while (!shutdown.get()) {
-            var records = kafkaConsumer.poll(Duration.ofMillis(Long.MAX_VALUE));
+            var records = kafkaConsumer.poll(Duration.ofMillis(100));
             records.forEach(this::doProcess);
-            // Асинхронный коммит смещений, фиксируем после успешной обработки данных
+            // Асинхронный коммит смещений, фиксируем после обработки данных
             kafkaConsumer.commitAsync((offsets, exception) -> {
                 if (Objects.nonNull(exception)) {
                     log.error("Commit failed for offsets: {} due to {}", offsets, exception.getLocalizedMessage());
@@ -45,19 +46,16 @@ public class DataConsumer implements Runnable {
     }
 
     private void doProcess(ConsumerRecord<String, byte[]> record) {
-        boolean isSuccess = Boolean.FALSE;
-        while (!isSuccess && !shutdown.get()) {
-            try {
-                // Декодируем запись из Avro формата
-                var reader = new SpecificDatumReader<>(avro.User.class);
-                var decoder = DecoderFactory.get().binaryDecoder(record.value(), null);
-                var user = reader.read(null, decoder);
-                System.out.printf("Received user: %s%n", user);
-                // Устанавливаем флаг успеха, если сообщение успешно обработано и данные выведены в консоль
-                isSuccess = Boolean.TRUE;
-            } catch (Exception ex) {
-                log.error("Unexpected error:", ex);
-            }
+        try {
+            // Декодируем запись из Avro формата
+            var reader = new SpecificDatumReader<>(avro.User.class);
+            var decoder = DecoderFactory.get().binaryDecoder(record.value(), null);
+            var user = reader.read(null, decoder);
+            System.out.printf("Received user: %s%n", user);
+        } catch (Exception ex) {
+            log.error("Unexpected error:", ex);
+            // Возвращаемся на текущее смещение
+            kafkaConsumer.seek(new TopicPartition(topic, record.partition()), record.offset());
         }
     }
 
