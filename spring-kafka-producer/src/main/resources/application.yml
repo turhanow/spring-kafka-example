@@ -1,0 +1,15 @@
+server:
+  port: 9080
+
+spring:
+  application:
+    name: spring-kafka-producer
+  kafka:
+    producer:
+      bootstrap_servers: localhost:9092
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    template:
+      default-topic: test-user
+
+scheduler:
+  data-producer: PT1S

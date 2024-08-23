@@ -1,0 +1,21 @@
+server:
+  port: 9081
+
+spring:
+  application:
+    name: spring-kafka-consumer
+  kafka:
+    consumer:
+      bootstrap_servers: localhost:9092
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      properties:
+        group.id: spring-kafka-consumer
+      enable-auto-commit: false
+
+
+kafka:
+  input:
+    topic: test-user
+
+scheduler:
+  data-consumer: PT1S
